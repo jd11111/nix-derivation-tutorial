@@ -9,6 +9,7 @@ We can:
 - create a derivation by calling the in-built ```derivation``` function in a .nix file and running ```nix-instantiate /path/to/file.nix``` 
 - directly build a derivation from a .nix file calling the ```derivation``` function using ```nix-build  /path/to/file.nix``` 
 
+## All About NixPkgs
 
 NixOS comes with the Nix language.
 We can enter a repl as follows:
@@ -29,12 +30,13 @@ give us what we want:
 ```console
 nix-repl> pkgs = import <nixpkgs> {}
 ```
-Now ```pkgs``` is a set whose keys are derivations for packages.
+Now ```pkgs``` is a set whose keys are (among other things) derivations for packages.
 For example 
 ```console
 nix-repl> pkgs.cowsay
 «derivation /nix/store/mjdhnlbl9yrf34c96gn2zfby7ddpgy5i-cowsay-3.7.0.drv»
 ```
+Is the derivation for the ```cowsay``` binary.
 
 ## How Derivations Work
 
@@ -237,6 +239,37 @@ Tip: We can also use ```nix-build``` directly on myDerivation.nix to build our d
 
 ## Nix Shell
 
-To quote [the reference manual](https://nixos.org/manual/nix/stable/command-ref/nix-shell):
+To quote [the Nix reference manual](https://nixos.org/manual/nix/stable/command-ref/nix-shell):
 > The command nix-shell will build the dependencies of the specified derivation, but not the derivation itself. It will then start an interactive shell in which all environment variables defined by the derivation path have been set to their corresponding values, and the script $stdenv/setup has been sourced. This is useful for reproducing the environment of a derivation for development."
-The ```nix-shell``` command drops us into a shell 
+
+The ```nix-shell``` command can be both applied to a .drv file as well as a .nix file that calls the nix ```derivation``` function.
+
+Example:
+```console
+[jd@jd-nixos:~/nix-derivation-tutorial]$ nix-shell myDerivation.nix
+
+[nix-shell:~/nix-derivation-tutorial]$ echo $builder
+/nix/store/r9h133c9m8f6jnlsqzwf89zg9w0w78s8-bash-5.2-p15/bin/bash
+
+[nix-shell:~/nix-derivation-tutorial]$ echo $inputDrvs
+/nix/store/r9h133c9m8f6jnlsqzwf89zg9w0w78s8-bash-5.2-p15
+
+[nix-shell:~/nix-derivation-tutorial]$ echo $name
+hello
+
+[nix-shell:~/nix-derivation-tutorial]$ echo $out
+/nix/store/a89s0rsafrdc037lha4jkd4dhbkdis0l-hello
+
+[nix-shell:~/nix-derivation-tutorial]$ echo $system
+x86_64-linux
+
+[nix-shell:~/nix-derivation-tutorial]$ $builder
+
+\[\][\[\]jd@jd-nixos:~/nix-derivation-tutorial]$\[\] echo weirdshell
+weirdshell
+```
+As you can see we can now access all the variables defined in the "env" key of the derivation file.
+Including execution of the builder (bash).
+As you can imagine this might be usefull to debug the building of a derivation.
+
+
