@@ -2,12 +2,12 @@
 
 ## Summary
 
-Derivations (the files) are build instructions for files that are stored in ```/nix/store``` and end on ```.drv```.
+Derivations (the files) are build instructions for files that are stored in the nix store and end on ```.drv```.
 We can:
--  read a derivation in human readable form using ```nix derivation show /path/to/derivation.drv --extra-experimental-features nix-command ```
+-  display a derivation in human readable form using ```nix derivation show /path/to/derivation.drv --extra-experimental-features nix-command ```
 - build a derivation using ```nix-store --realize /path/to/derivation.drv```.
 - create a derivation by calling the in-built ```derivation``` function in a .nix file and running ```nix-instantiate /path/to/file.nix``` 
-- directly build a file from a .nix file calling the ```derivation``` function using ```nix-build  /path/to/file.nix``` 
+- directly build a derivation from a .nix file calling the ```derivation``` function using ```nix-build  /path/to/file.nix``` 
 
 
 NixOS comes with the Nix language.
@@ -129,7 +129,7 @@ The keys are relatively self-explanatory:
 - "outputs" is another dictionary specifiying what will be output by the derivation, in this case "out" (which is the default) which will contain the actual cowsay binary and "man" which will contain the manual, the path has the obvious meaning
 - "system" just specifies the system we are building on
 - "inputDrvs" are the derivations whose outputs are needed to build the program (i.e. bash)
-- "inputSrcs" are sourcefiles that are needed (in this case default.builder.sh)
+- "inputSrcs" are sourcefiles that are needed (in this case default-builder.sh)
 - "builder" specifies the binary that will be run with args "args" to build the output (in this case bash)
 - "env" are enviromental variables available during build (notice that both "outputs" and "inputSrcs" and the outputs of "inputDrvs" are referenced here)
 
@@ -235,4 +235,8 @@ hello world
 ```
 Tip: We can also use ```nix-build``` directly on myDerivation.nix to build our derivation.
 
+## Nix Shell
 
+To quote [the reference manual](https://nixos.org/manual/nix/stable/command-ref/nix-shell):
+> The command nix-shell will build the dependencies of the specified derivation, but not the derivation itself. It will then start an interactive shell in which all environment variables defined by the derivation path have been set to their corresponding values, and the script $stdenv/setup has been sourced. This is useful for reproducing the environment of a derivation for development."
+The ```nix-shell``` command drops us into a shell 
