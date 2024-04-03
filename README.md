@@ -1,4 +1,14 @@
-# NixOS demystified
+# NixOS derivations demystified
+
+## Summary
+
+Derivations (the files) are build instructions for files that are stored in ```/nix/store``` and end on ```.drv```.
+We can:
+-  read a derivation in human readable form using ```nix derivation show /path/to/derivation.drv --extra-experimental-features nix-command ```
+- build a derivation using ```nix-store --realize /path/to/derivation.drv```.
+- create a derivation by calling the in-built ```derivation``` function in a .nix file and running ```nix-instantiate /path/to/file.nix``` 
+- directly build a file from a .nix file calling the ```derivation``` function using ```nix-build  /path/to/file.nix``` 
+
 
 NixOS comes with the Nix language.
 We can enter a repl as follows:
@@ -28,11 +38,10 @@ nix-repl> pkgs.cowsay
 
 ## How Derivations Work
 
-A derivation is a essentially a build instruction for something.
+A derivation is a essentially a build instruction for a file (or mutiple files etc.).
+For example the above derivation is the build instruction for the cowsay binary.
 We can look at a derivation in human readable form as follows (:q to exit the nix-repl):
-(i deleted some of the subkeys of the output to improve readability)
 ```console
-nix-repl> pkgs.cowsay
 [jd@jd-nixos:~/nix-derivation-tutorial]$ nix derivation show /nix/store/mjdhnlbl9yrf34c96gn2zfby7ddpgy5i-cowsay-3.7.0.drv --extra-experimental-features nix-command
 {
   "/nix/store/mjdhnlbl9yrf34c96gn2zfby7ddpgy5i-cowsay-3.7.0.drv": {
@@ -133,7 +142,7 @@ warning: you did not specify '--add-root'; the result might be removed by the ga
 ```
 Now the cowsay binary is built and we can run it:
 ```console
-/nix/store/pjaiq8m9rjgj9akjgmbzmz86cvxwsyqm-cowsay-3.7.0/bin/cowsay "hello world"
+ [jd@jd-nixos:~/nix-derivation-tutorial]$ /nix/store/pjaiq8m9rjgj9akjgmbzmz86cvxwsyqm-cowsay-3.7.0/bin/cowsay "hello world"
  _____________
 < hello world >
  -------------
@@ -159,17 +168,16 @@ derivation {
   inputDrvs = [pkgs.bash];
 }
 ```
-Now the arguments of ```derivation``` are self-explanatory in view of our exploration of the cowsay derivation above.
+Now the arguments of ```derivation``` (the function) are self-explanatory in view of our exploration of the cowsay derivation (the file) above.
 The only thing (apart from the let in, which i will just assume we understand) interesting here is
 ```"${pkgs.bash}/bin/bash"```.
 "${pkgs.bash}" is a string interpolation and will expand to the path of the default output ("out")
 of the derivation $pkgs.bash (you can test this in the repl).
-So in this case it will expand to the actual location of the bash binary.
+So in this case it will expand to the path of the bash binary.
 
-Now back in the nix repl:
+Now back in the nix repl (or ```nix-instantiate myDerivation.nix```):
 ```console
 nix-repl> d = import ./myDerivation.nix
-
 nix-repl> d
 «derivation /nix/store/lbg51ad23fp916qz2khbc786vj4yhpah-hello.drv»
 ```
@@ -226,6 +234,5 @@ If we print the content of the file:
 hello world
 ```
 Tip: We can also use ```nix-build``` directly on myDerivation.nix to build our derivation.
-
 
 
