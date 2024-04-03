@@ -8,6 +8,9 @@ We can:
 - build a derivation using ```nix-store --realize /path/to/derivation.drv```.
 - create a derivation by calling the in-built ```derivation``` function in a .nix file and running ```nix-instantiate /path/to/file.nix``` 
 - directly build a derivation from a .nix file calling the ```derivation``` function using ```nix-build  /path/to/file.nix``` 
+- drop into a shell that has all input derivations of a derivation built with ```nix-shell /path/to/file.nix```
+
+A larger pratical example using all these features is contained in the ```rustEnv``` directory of this repo. It is described in the final section of this file.
 
 ## All About NixPkgs
 
@@ -320,7 +323,7 @@ echo "stdenv setup sourced"
 ```
 So
 ```console
-source $setup
-echo "stdenv setup sourced"
+[jd@jd-nixos:~/nix-derivation-tutorial/rustEnv]$ nix-shell rustShell.nix
+stdenv setup sourced
 ```
 will drop us into a shell that has  all the (specific) ```inputDrvs``` binaries on path and nothing else! Perfect for development even when we dont want to build our app with Nix.
