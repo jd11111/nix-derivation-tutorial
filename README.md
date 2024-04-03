@@ -225,5 +225,7 @@ If we print the content of the file:
 [jd@jd-nixos:~/nix-derivation-tutorial]$ cat /nix/store/a89s0rsafrdc037lha4jkd4dhbkdis0l-hello
 hello world
 ```
+Tip: We can also use ```nix-build``` directly on myDerivation.nix to build our derivation.
+
 
 
