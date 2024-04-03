@@ -244,7 +244,7 @@ To quote [the Nix reference manual](https://nixos.org/manual/nix/stable/command-
 
 The ```nix-shell``` command can be both applied to a .drv file as well as a .nix file that calls the nix ```derivation``` function.
 
-Example:
+### Simple Example:
 ```console
 [jd@jd-nixos:~/nix-derivation-tutorial]$ nix-shell myDerivation.nix
 
@@ -270,6 +270,57 @@ weirdshell
 ```
 As you can see we can now access all the variables defined in the "env" key of the derivation file.
 Including execution of the builder (bash).
-As you can imagine this might be usefull to debug the building of a derivation.
 
+# Putting It All Together
 
+Consider the ```rustEnv``` directory.
+The file ```rustShell.nix``` is a derivation to compile a rust programm (hello world).
+It has the following content:
+```nix
+let pkgs = import <nixpkgs> {}; in
+derivation {
+  name = "rust-env";
+  system = "x86_64-linux";
+  builder = "${pkgs.bash}/bin/bash";
+  args = [ ./builder.sh ];
+  outputs = ["out"];
+  setup = ./setup.sh;
+  stdenv = ./myStdEnv;
+  src = ./helloworld;
+  inputDrvs = [pkgs.bash pkgs.rustc pkgs.cargo pkgs.coreutils pkgs.gcc];
+}
+```
+Now the paths we pass here for args, setup and stdenv as well as src are not actual paths (which would be passed as a string).
+These mean that those files will be put into the nix store and then the actual path to those store items will be used as the arguments.
+
+Now the builder is bash and will simply run ```builder.sh```.
+```builder.sh``` has the following contents:
+```bash
+source $setup
+cd $src
+cargo build --target-dir $out
+```
+and ```setup.sh`` (which is what is being sourced here) has the content:
+```bash
+unset PATH
+for p in $inputDrvs; do
+  export PATH=$p/bin${PATH:+:}$PATH
+done
+```
+This simply deleted the path and adds all the binaries from the built ```inputDrvs``` to the path.
+This is why we can run ```cargo``` using the ```cargo```command in ```builder.sh```.
+
+We can also use ```rustShell.nix``` to get into a shell will all the ```inputDrvs``` binaries on the path and nothing else by using ```nix-shell```.
+Before giving us the shell ```nix-shell``` will run build the input derivations and
+source ```$stdenv/setup```.
+Now the file ```myStdEnv/setup``` is simply:
+```bash
+source $setup
+echo "stdenv setup sourced"
+```
+So
+```console
+source $setup
+echo "stdenv setup sourced"
+```
+will drop us into a shell that has  all the (specific) ```inputDrvs``` binaries on path and nothing else! Perfect for development even when we dont want to build our app with Nix.
